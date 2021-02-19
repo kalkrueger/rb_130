@@ -1,4 +1,7 @@
-arr1 = [1, 2]
-arr2 = ['a', 'b']
+require 'minitest/autorun'
 
-p arr2 + arr1
+class MyFirstTest < Minitest::Test
+  def test_first_test
+    assert true
+  end
+end
