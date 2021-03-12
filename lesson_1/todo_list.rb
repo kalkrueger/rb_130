@@ -1,10 +1,13 @@
+# frozen_string_literal: true
+
+# toplevel ToDo
 class Todo
   DONE_MARKER = 'X'
   UNDONE_MARKER = ' '
 
   attr_accessor :title, :description, :done
 
-  def initialize(title, description='')
+  def initialize(title, description = '')
     @title = title
     @description = description
     @done = false
@@ -26,14 +29,14 @@ class Todo
     "[#{done? ? DONE_MARKER : UNDONE_MARKER}] #{title}"
   end
 
-  def ==(otherTodo)
-    title == otherTodo.title &&
-      description == otherTodo.description &&
-      done == otherTodo.done
+  def ==(other)
+    title == other.title &&
+      description == other.description &&
+      done == other.done
   end
 end
 
-
+# toplevel List
 class TodoList
   attr_accessor :title
 
@@ -43,13 +46,12 @@ class TodoList
   end
 
   def add(todo_item)
-    if todo_item.instance_of?(Todo)
-      @todos << todo_item
-    else
-      raise TypeError, "Can only add Todo Objects"
-    end
+    raise TypeError, 'Can only add Todo Objects' unless
+      todo_item.instance_of?(Todo)
+
+    @todos << todo_item
   end
-  alias_method :<<, :add
+  alias << add
 
   def size
     @todos.size
@@ -68,7 +70,7 @@ class TodoList
   end
 
   def done?
-    @todos.all?{ |item| item.done? }
+    @todos.all?(&:done?)
   end
 
   def item_at(item_index)
@@ -84,7 +86,7 @@ class TodoList
   end
 
   def done!
-    @todos.each{ |item| item.done! }
+    @todos.each(&:done!)
   end
 
   def shift
@@ -105,56 +107,38 @@ class TodoList
     text
   end
 
-  def each
-    @todos.each{ |item| yield(item) }
+  def each(&block)
+    @todos.each(&block)
     self
   end
 
   def select
-    results = TodoList.new("Selected")
-    @todos.each { |item| results.add(item) if yield(item)}
+    results = TodoList.new('Selected')
+    @todos.each { |item| results.add(item) if yield(item) }
     results
   end
 
   def find_by_title(title)
-    select{ |item| item.title == title }.first
+    select { |item| item.title == title }.first
   end
 
   def all_done
-    select{ |item| item.done?}
+    select(&:done?)
   end
 
   def all_not_done
-    select{ |item| !item.done?}
+    select { |item| !item.done? }
   end
 
   def mark_done(title)
-    find_by_title(title) && find_by_title(title).done!
+    find_by_title(title)&.done!
   end
 
   def mark_all_done
-    each{ |item| item.done!}
+    each(&:done!)
   end
 
   def mark_all_undone
-    each{ |item| item.undone!}
+    each(&:undone!)
   end
-
 end
-
-todo1 = Todo.new("Buy milk")
-todo2 = Todo.new("Clean room")
-todo3 = Todo.new("Go to gym")
-
-list = TodoList.new("Today's Todos")
-list.add(todo1)
-list.add(todo2)
-list.add(todo3)
-
-results = list.select { |todo| todo.done? }    # you need to implement this method
-
-p list.find_by_title("Buy milk")
-list.mark_all_done
-p list.all_done
-list.mark_all_undone
-p list.all_not_done
